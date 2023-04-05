@@ -1,4 +1,4 @@
-version: "3.4"
+version: '3.4'
 
 services:
   # client:
@@ -10,21 +10,22 @@ services:
   #   ports:
   #     - 3080:80
   #   volumes:
-  #     - /client/node_modules
+  #     - /share/Container/chatgptclone/application/client/node_modules:/app/node_modules
   #   depends_on:
   #     - api
   api:
     ports:
-      - 3080:3080               # Change it to 9000:3080 if you want to use nginx
+      - 9000:3080
     depends_on:
       - mongodb
+      - meilisearch
     image: node-api
     build:
       context: .
       target: node-api
     restart: always
     env_file:
-      - ./api/.env
+      - /share/Container/chatgptclone/application/api/.env
     environment:
       - HOST=0.0.0.0
       - NODE_ENV=production
@@ -32,26 +33,26 @@ services:
       - MEILI_HOST=http://meilisearch:7700
       - MEILI_HTTP_ADDR=meilisearch:7700
     volumes:
-      - /client/node_modules
-      - ./api:/api
-      - /api/node_modules
+      - /share/Container/chatgptclone/application/client/node_modules:/app/node_modules
+      - /share/Container/chatgptclone/application/api:/api
+      - /share/Container/chatgptclone/application/api/node_modules:/api/node_modules
   mongodb:
     ports:
-      - 27018:27017
+      - 27017:27017
     image: mongo
     restart: always
     container_name: mongodb
     volumes:
-      - ./data-node:/data/db
+      - /share/Container/chatgptclone/application/data-node:/data/db
     command: mongod --noauth
   meilisearch:
-    image: getmeili/meilisearch:v1.0
+    image: getmeili/meilisearch
     ports:
       - 7700:7700
     env_file:
-      - ./api/.env
+      - /share/Container/chatgptclone/application/api/.env
     environment:
       - MEILI_HOST=http://meilisearch:7700
       - MEILI_HTTP_ADDR=meilisearch:7700
     volumes:
-      - ./meili_data:/meili_data
+      - /share/Container/chatgptclone/application/meili_data:/data.ms
